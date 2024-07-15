@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Moon-App</title>
+    <link rel="stylesheet" href="profile.css"> <!-- Updated to use profile.css -->
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .fade-out-down {
+            animation: fadeOutDown 0.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOutDown {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingScreen">
+        <div class="loader"></div>
+        <div id="loadingText">Loading...</div>
+    </div>
+    <div id="backgroundOverlay" class="background-overlay"></div>
+    <header>
+        <h1>Dashboard</h1>
+        <div class="profile-icon" onclick="goToSettings()">
+            <img src="default-avatar.png" alt="Profile">
+        </div>
+    </header>
+    <nav>
+        <a href="#" onclick="showContent('uploadSection')">Upload Files</a>
+        <a href="#" onclick="showContent('filesSection')">Uploaded Files</a>
+        <a href="#" onclick="goToProfile()">Profile</a> <!-- Updated Profile Link -->
+    </nav>
+    <div class="storage-container" onclick="toggleStorageDetails(event)">
+        <div class="storage-bar" id="storageBar">
+            <div class="storage-bar-inner" id="storageBarInner"></div>
+            <div class="storage-bar-text" id="storageBarText">Storage Used: 0 MB / 215 MB</div>
+        </div>
+    </div>
+    <div class="storage-details" id="storageDetails">
+        <h3>Storage Details</h3>
+        <ul id="storageDetailsList"></ul>
+        <p><strong>File using most storage:</strong> <span id="largestFile"></span></p>
+        <p><strong>Current Plan:</strong> <span id="currentPlan"></span></p>
+        <p><strong>Your Internet Speed:</strong> <span id="userInternetSpeed"></span></p>
+        <p><strong>Server Internet Speed:</strong> <span id="serverInternetSpeed"></span></p>
+    </div>
+    <main>
+        <div id="uploadSection" class="content active">
+            <h2>Welcome to your moon app dashboard!</h2>
+            <p>Here you can manage your files and images.</p>
+            <div class="upload-form">
+                <h3>Upload a new file</h3>
+                <input type="file" id="fileInput" accept="image/gif, image/png, image/jpeg, image/webp, audio/mpeg, audio/wav, audio/x-m4a, video/mp4" onchange="previewFile()">
+                <label for="fileInput">Choose File</label>
+                <button onclick="uploadFile()">Upload</button>
+                <div class="file-preview" id="filePreview">
+                    <img id="previewImage" src="" alt="File Preview">
+                    <video id="previewVideo" controls style="display: none;"></video>
+                    <audio id="previewAudio" controls style="display: none;"></audio>
+                </div>
+            </div>
+        </div>
+        <div id="filesSection" class="content">
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Search files..." oninput="filterFiles()">
+                <button class="toggle-media-button" id="toggleMediaButton" onclick="toggleMedia()">Enable Media</button>
+            </div>
+            <div class="file-list" id="fileList">
+                <h3>Uploaded Files</h3>
+                <div id="loadingFiles" class="files-loading-overlay">
+                    <div class="files-loading-spinner"></div>
+                    <div class="files-loading-text">Loading files...</div>
+                </div>
+            </div>
+            <div class="pagination" id="pagination">
+                <button onclick="prevPage()">Previous</button>
+                <button onclick="nextPage()">Next</button>
+            </div>
+        </div>
+        <div id="profileSection" class="content"> <!-- New Profile Section -->
+            <h2>Profile</h2>
+            <div class="profile-content">
+                <div class="profile-picture">
+                    <img src="default-avatar.png" alt="Profile Picture" id="profilePicturePreview">
+                    <input type="file" id="profilePictureInput" accept="image/*" onchange="previewProfilePicture()">
+                </div>
+                <div class="profile-details">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" placeholder="Enter your username">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" placeholder="Enter your password">
+                    <button onclick="updateProfile()">Save Profile</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div class="notification" id="notification"></div>
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h3>Confirm Delete</h3>
+            <p>Are you sure you want to delete this file?</p>
+            <button onclick="confirmDelete()">Yes</button>
+            <button onclick="closeModal('deleteModal')">No</button>
+        </div>
+    </div>
+    <script>
+        const maxStorage = 215 * 1024 * 1024; // 215 MB
+        const maxFileSize = 50 * 1024 * 1024; // 50 MB
+        const filesPerPage = 5;
+        let totalSize = 0;
+        let currentPage = 1;
+        let files = [];
+        let fileToDelete = null;
+        let animationsEnabled = true;
+        let mediaEnabled = true;
+
+        function showContent(sectionId) {
+            const currentSection = document.querySelector('.content.active');
+            const newSection = document.getElementById(sectionId);
+
+            if (currentSection) {
+                currentSection.classList.remove('active');
+                currentSection.classList.add('fade-out-down');
+
+                setTimeout(() => {
+                    currentSection.classList.remove('fade-out-down');
+                    newSection.classList.add('active');
+                    newSection.classList.add('fade-in');
+
+                    setTimeout(() => {
+                        newSection.classList.remove('fade-in');
+                    }, 500);
+                }, 500);
+            } else {
+                newSection.classList.add('active');
+                newSection.classList.add('fade-in');
+
+                setTimeout(() => {
+                    newSection.classList.remove('fade-in');
+                }, 500);
+            }
+
+            if (sectionId === 'filesSection') {
+                animateFileBoxes();
+            }
+        }
+
+        function toggleProfileContent() {
+            const profileContent = document.getElementById('profileContent');
+            const backgroundOverlay = document.getElementById('backgroundOverlay');
+            const isActive = profileContent.style.display === 'block';
+            profileContent.style.display = isActive ? 'none' : 'block';
+            backgroundOverlay.classList.toggle('active', !isActive);
+        }
+
+        function previewFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            const filePreview = document.getElementById('filePreview');
+            const previewImage = document.getElementById('previewImage');
+            const previewVideo = document.getElementById('previewVideo');
+            const previewAudio = document.getElementById('previewAudio');
+
+            if (file) {
+                const fileSize = file.size;
+                if (fileSize > maxFileSize) {
+                    showNotification('File size exceeds the 50MB limit.');
+                    fileInput.value = '';
+                    filePreview.style.display = 'none';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const fileURL = e.target.result;
+                    if (file.type.startsWith('image/')) {
+                        previewImage.src = fileURL;
+                        previewImage.style.display = 'block';
+                        previewVideo.style.display = 'none';
+                        previewAudio.style.display = 'none';
+                    } else if (file.type.startsWith('video/')) {
+                        previewVideo.src = fileURL;
+                        previewVideo.style.display = 'block';
+                        previewImage.style.display = 'none';
+                        previewAudio.style.display = 'none';
+                    } else if (file.type.startsWith('audio/')) {
+                        previewAudio.src = fileURL;
+                        previewAudio.style.display = 'block';
+                        previewImage.style.display = 'none';
+                        previewVideo.style.display = 'none';
+                    }
+                    filePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                filePreview.style.display = 'none';
+            }
+        }
+
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showNotification('Please select a file to upload');
+                return;
+            }
+
+            if (totalSize + file.size > maxStorage) {
+                showNotification('Uploading this file will exceed your storage limit.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                console.log('Upload response:', result);
+
+                if (response.ok) {
+                    showNotification('File uploaded successfully');
+                    fileInput.value = ''; // Clear the file input
+                    document.getElementById('filePreview').style.display = 'none'; // Clear the preview
+                    loadFiles();
+                    copyToClipboard(`${window.location.origin}/uploads/${result.filename}`);
+                } else {
+                    showNotification('File upload failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showNotification('An error occurred during the upload. Please try again.');
+            }
+        }
+
+        function copyToClipboard(text, button) {
+            const tempInput = document.createElement('input');
+            tempInput.style.position = 'absolute';
+            tempInput.style.left = '-9999px';
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showNotification('File link copied to clipboard');
+
+            // Show tick animation
+            button.classList.add('copied');
+            setTimeout(() => {
+                button.classList.remove('copied');
+            }, 1000);
+        }
+
+        async function loadFiles() {
+            const response = await fetch('/files');
+            files = await response.json();
+
+            totalSize = 0;
+            files.forEach(file => totalSize += file.size);
+
+            updateStorageBar(totalSize);
+            renderFiles();
+            updateStorageDetails();
+        }
+
+        function renderFiles() {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+
+            const start = (currentPage - 1) * filesPerPage;
+            const end = start + filesPerPage;
+            const currentFiles = files.slice(start, end);
+
+            currentFiles.forEach((file, index) => {
+                const fileBox = document.createElement('div');
+                fileBox.className = `file-box ${animationsEnabled ? '' : 'no-animations'}`;
+                fileBox.style.animationDelay = `${index * 0.15}s`;
+
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+
+                const fileLink = document.createElement('a');
+                fileLink.href = `/uploads/${file.filename}`;
+                fileLink.textContent = file.originalname;
+
+                const fileSize = document.createElement('p');
+                fileSize.textContent = `Size: ${Math.ceil(file.size / (1024 * 1024))} MB`;
+
+                const fileDate = document.createElement('p');
+                fileDate.textContent = `Uploaded on: ${new Date(file.uploadDate).toLocaleString()}`;
+
+                const buttonGroup = document.createElement('div');
+                buttonGroup.className = 'button-group';
+
+                const downloadButton = document.createElement('button');
+                downloadButton.textContent = 'Download';
+                downloadButton.onclick = () => downloadFile(file.filename);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => openDeleteModal(file.filename);
+
+                const copyButton = document.createElement('button');
+                copyButton.className = 'copy-button';
+                copyButton.innerHTML = '<span class="icon-clipboard">📋</span><span class="icon-check">✔️</span>';
+                copyButton.onclick = () => copyToClipboard(`${window.location.origin}/uploads/${file.filename}`, copyButton);
+
+                fileInfo.appendChild(fileLink);
+                fileInfo.appendChild(fileSize);
+                fileInfo.appendChild(fileDate);
+                fileInfo.appendChild(buttonGroup);
+
+                buttonGroup.appendChild(downloadButton);
+                buttonGroup.appendChild(deleteButton);
+                buttonGroup.appendChild(copyButton);
+
+                const fileMedia = document.createElement('div');
+                fileMedia.className = 'file-media';
+
+                if (mediaEnabled) {
+                    if (file.mimetype.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = `/uploads/${file.filename}`;
+                        img.style.maxWidth = '100%';
+                        img.style.maxHeight = '200px';
+                        img.style.borderRadius = '10px';
+                        img.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+                        fileMedia.appendChild(img);
+                    } else if (file.mimetype.startsWith('video/')) {
+                        const video = document.createElement('video');
+                        video.src = `/uploads/${file.filename}`;
+                        video.controls = true;
+                        video.style.width = '300px';
+                        video.style.borderRadius = '10px';
+                        video.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+                        video.style.margin = '0 auto';
+                        video.addEventListener('play', pauseOtherMedia);
+                        fileMedia.appendChild(video);
+                    } else if (file.mimetype.startsWith('audio/')) {
+                        const audio = document.createElement('audio');
+                        audio.src = `/uploads/${file.filename}`;
+                        audio.controls = true;
+                        audio.style.width = '300px';
+                        audio.style.borderRadius = '10px';
+                        audio.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+                        audio.style.margin = '0 auto';
+                        audio.addEventListener('play', pauseOtherMedia);
+                        fileMedia.appendChild(audio);
+                    }
+                }
+
+                fileBox.appendChild(fileInfo);
+                fileBox.appendChild(fileMedia);
+
+                fileList.appendChild(fileBox);
+            });
+
+            updatePagination();
+            animateFileBoxes();
+        }
+
+        function animateFileBoxes() {
+            const fileBoxes = document.querySelectorAll('.file-box');
+            if (animationsEnabled) {
+                fileBoxes.forEach((box, index) => {
+                    setTimeout(() => {
+                        box.classList.add('loaded');
+                    }, index * 150); // 0.15 seconds delay for each file box
+                });
+            } else {
+                fileBoxes.forEach((box) => {
+                    box.classList.add('loaded', 'no-animations');
+                });
+            }
+        }
+
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            const totalPages = Math.ceil(files.length / filesPerPage);
+
+            pagination.innerHTML = `
+                <button onclick="prevPage()" ${currentPage === 1 ? 'class="disabled"' : ''}>Previous</button>
+                <button onclick="nextPage()" ${currentPage === totalPages ? 'class="disabled"' : ''}>Next</button>
+            `;
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderFiles();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(files.length / filesPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderFiles();
+            }
+        }
+
+        function openDeleteModal(filename) {
+            fileToDelete = filename;
+            const deleteModal = document.getElementById('deleteModal');
+            deleteModal.classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('active');
+        }
+
+        async function confirmDelete() {
+            try {
+                const response = await fetch(`/delete/${fileToDelete}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showNotification('File deleted successfully');
+                    loadFiles();
+                } else {
+                    showNotification('File deletion failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                showNotification('An error occurred during file deletion. Please try again.');
+            } finally {
+                closeModal('deleteModal');
+            }
+        }
+
+        function downloadFile(filename) {
+            const link = document.createElement('a');
+            link.href = `/uploads/${filename}`;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function previewProfilePicture() {
+            const profilePictureInput = document.getElementById('profilePictureInput');
+            const profilePicturePreview = document.getElementById('profilePicturePreview');
+            const file = profilePictureInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    profilePicturePreview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function updateProfile() {
+            const profilePicture = document.getElementById('profilePictureInput').files[0];
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            const formData = new FormData();
+            formData.append('profilePicture', profilePicture);
+            formData.append('username', username);
+            formData.append('email', email);
+            formData.append('password', password);
+
+            try {
+                const response = await fetch('/updateProfile', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                console.log('Update profile response:', result);
+
+                if (response.ok) {
+                    showNotification('Profile updated successfully');
+                    location.reload();
+                } else {
+                    showNotification('Profile update failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Profile update error:', error);
+                showNotification('An error occurred during the profile update. Please try again.');
+            }
+        }
+
+        function filterFiles() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const filteredFiles = files.filter(file => file.originalname.toLowerCase().includes(searchInput));
+            renderFilteredFiles(filteredFiles);
+        }
+
+        function renderFilteredFiles(filteredFiles) {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '<h3>Uploaded Files</h3>';
+
+            filteredFiles.forEach((file, index) => {
+                const fileBox = document.createElement('div');
+                fileBox.className = `file-box ${animationsEnabled ? '' : 'no-animations'}`;
+                fileBox.style.animationDelay = `${index * 0.15}s`;
+
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+
+                const fileLink = document.createElement('a');
+                fileLink.href = `/uploads/${file.filename}`;
+                fileLink.textContent = file.originalname;
+
+                const fileSize = document.createElement('p');
+                fileSize.textContent = `Size: ${Math.ceil(file.size / (1024 * 1024))} MB`;
+
+                const fileDate = document.createElement('p');
+                fileDate.textContent = `Uploaded on: ${new Date(file.uploadDate).toLocaleString()}`;
+
+                const buttonGroup = document.createElement('div');
+                buttonGroup.className = 'button-group';
+
+                const downloadButton = document.createElement('button');
+                downloadButton.textContent = 'Download';
+                downloadButton.onclick = () => downloadFile(file.filename);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.onclick = () => openDeleteModal(file.filename);
+
+                const copyButton = document.createElement('button');
+                copyButton.className = 'copy-button';
+                copyButton.innerHTML = '<span class="icon-clipboard">📋</span><span class="icon-check">✔️</span>';
+                copyButton.onclick = () => copyToClipboard(`${window.location.origin}/uploads/${file.filename}`, copyButton);
+
+                fileInfo.appendChild(fileLink);
+                fileInfo.appendChild(fileSize);
+                fileInfo.appendChild(fileDate);
+                fileInfo.appendChild(buttonGroup);
+
+                buttonGroup.appendChild(downloadButton);
+                buttonGroup.appendChild(deleteButton);
+                buttonGroup.appendChild(copyButton);
+
+                const fileMedia = document.createElement('div');
+                fileMedia.className = 'file-media';
+
+                if (mediaEnabled) {
+                    if (file.mimetype.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = `/uploads/${file.filename}`;
+                        img.style.maxWidth = '100%';
+                        img.style.maxHeight = '200px';
+                        img.style.borderRadius = '10px';
+                        img.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+                        fileMedia.appendChild(img);
+                    } else if (file.mimetype.startsWith('video/')) {
+                        const video = document.createElement('video');
+                        video.src = `/uploads/${file.filename}`;
+                        video.controls = true;
+                        video.style.width = '300px';
+                        video.style.borderRadius = '10px';
+                        video.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+                        video.style.margin = '0 auto';
+                        video.addEventListener('play', pauseOtherMedia);
+                        fileMedia.appendChild(video);
+                    } else if (file.mimetype.startsWith('audio/')) {
+                        const audio = document.createElement('audio');
+                        audio.src = `/uploads/${file.filename}`;
+                        audio.controls = true;
+                        audio.style.width = '300px';
+                        audio.style.borderRadius = '10px';
+                        audio.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+                        audio.style.margin = '0 auto';
+                        audio.addEventListener('play', pauseOtherMedia);
+                        fileMedia.appendChild(audio);
+                    }
+                }
+
+                fileBox.appendChild(fileInfo);
+                fileBox.appendChild(fileMedia);
+
+                fileList.appendChild(fileBox);
+            });
+
+            updatePagination();
+            animateFileBoxes();
+        }
+
+        function pauseOtherMedia(event) {
+            const mediaElements = document.querySelectorAll('video, audio');
+            mediaElements.forEach(media => {
+                if (media !== event.target) {
+                    media.pause();
+                }
+            });
+        }
+
+        function toggleAnimations() {
+            animationsEnabled = !animationsEnabled;
+            if (!animationsEnabled) {
+                document.body.classList.add('no-animations');
+                document.querySelectorAll('.file-box').forEach(box => box.classList.add('no-animations'));
+            } else {
+                document.body.classList.remove('no-animations');
+                document.querySelectorAll('.file-box').forEach(box => box.classList.remove('no-animations'));
+            }
+        }
+
+        function showNotification(message) {
+            const disableNotifications = document.getElementById('disableNotifications')?.checked;
+            if (disableNotifications) return;
+
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateStorageBar(totalSize) {
+            const storageBarInner = document.getElementById('storageBarInner');
+            const storageBarText = document.getElementById('storageBarText');
+            const usedPercentage = (totalSize / maxStorage) * 100;
+
+            storageBarInner.style.width = `${usedPercentage}%`;
+            storageBarText.textContent = `Storage Used: ${Math.ceil(totalSize / (1024 * 1024))} MB / 215 MB`;
+        }
+
+        function toggleStorageDetails(event) {
+            const storageDetails = document.getElementById('storageDetails');
+            const backgroundOverlay = document.getElementById('backgroundOverlay');
+            const isActive = storageDetails.classList.contains('slide-down');
+
+            if (isActive) {
+                storageDetails.classList.remove('slide-down');
+                storageDetails.classList.add('slide-up');
+                setTimeout(() => {
+                    storageDetails.style.display = 'none';
+                }, 500);
+            } else {
+                storageDetails.style.display = 'block';
+                storageDetails.classList.remove('slide-up');
+                storageDetails.classList.add('slide-down');
+            }
+
+            backgroundOverlay.classList.toggle('active', !isActive);
+
+            // Prevent clicking on the storage details container from closing it
+            event.stopPropagation();
+        }
+
+        function updateStorageDetails() {
+            const storageDetailsList = document.getElementById('storageDetailsList');
+            const largestFile = files.reduce((max, file) => file.size > max.size ? file : max, files[0]);
+            const currentPlan = 'Free Plan'; // Replace with actual plan logic
+            const userInternetSpeed = '100 Mbps'; // Replace with actual user speed logic
+            const serverInternetSpeed = '1 Gbps'; // Replace with actual server speed logic
+
+            storageDetailsList.innerHTML = '';
+
+            files.forEach(file => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${file.originalname} - ${Math.ceil(file.size / (1024 * 1024))} MB`;
+                storageDetailsList.appendChild(listItem);
+            });
+
+            document.getElementById('largestFile').textContent = `${largestFile.originalname} (${Math.ceil(largestFile.size / (1024 * 1024))} MB)`;
+            document.getElementById('currentPlan').textContent = currentPlan;
+            document.getElementById('userInternetSpeed').textContent = userInternetSpeed;
+            document.getElementById('serverInternetSpeed').textContent = serverInternetSpeed;
+        }
+
+        function goToSettings() {
+            window.location.href = '/settings.html';
+        }
+
+        function goToProfile() {
+            window.location.href = '/profile.html';
+        }
+
+        async function checkLogin() {
+            const response = await fetch('/isLoggedIn');
+            if (response.status !== 200) {
+                showLoginScreen();
+            } else {
+                loadFiles();
+                const loadingScreen = document.getElementById('loadingScreen');
+                setTimeout(() => {
+                    loadingScreen.classList.add('hidden');
+                    document.body.style.overflow = 'auto'; // Allow scrolling after loading
+                    document.body.classList.add('loaded'); // Trigger animations for the main content
+                }, 750); // Show the loading screen for at least 0.75 seconds
+            }
+        }
+
+        function showLoginScreen() {
+            // Code to display login screen
+            document.getElementById('loadingScreen').classList.add('hidden');
+            // Implement login screen display logic here
+        }
+
+        function toggleMedia() {
+            mediaEnabled = !mediaEnabled;
+            const toggleButton = document.getElementById('toggleMediaButton');
+            toggleButton.textContent = mediaEnabled ? 'Disable Media' : 'Enable Media';
+
+            const fileList = document.getElementById('fileList');
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'files-loading-overlay';
+            loadingOverlay.innerHTML = `
+                <div class="files-loading-spinner"></div>
+                <div class="files-loading-text">Loading files...</div>
+            `;
+            fileList.appendChild(loadingOverlay);
+
+            setTimeout(() => {
+                loadFiles();
+                fileList.removeChild(loadingOverlay);
+            }, 2000); // Simulate loading time
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLogin();
+            const loadingScreen = document.getElementById('loadingScreen');
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Allow scrolling after loading
+                document.body.classList.add('loaded'); // Trigger animations for the main content
+            }, 750); // Show the loading screen for at least 0.75 seconds
+
+            // Close storage details if clicking outside of it
+            document.addEventListener('click', (event) => {
+                const storageDetails = document.getElementById('storageDetails');
+                if (storageDetails.classList.contains('slide-down') && !storageDetails.contains(event.target)) {
+                    storageDetails.classList.remove('slide-down');
+                    storageDetails.classList.add('slide-up');
+                    setTimeout(() => {
+                        storageDetails.style.display = 'none';
+                    }, 500);
+                    document.getElementById('backgroundOverlay').classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

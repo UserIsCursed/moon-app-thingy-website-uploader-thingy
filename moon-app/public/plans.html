@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plans and Pricing - Moon-App</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        header {
+            background: #1e1e1e;
+            color: #ffffff;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        nav {
+            background: #333333;
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+        }
+        nav a {
+            color: #e0e0e0;
+            text-decoration: none;
+            margin: 0 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        nav a:hover {
+            background: #555555;
+        }
+        main {
+            padding: 2rem;
+            text-align: center;
+        }
+        .pricing-plans {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .plan-box {
+            background: #1e1e1e;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .plan-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .plan-box h3 {
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+        .plan-box p {
+            margin: 1rem 0;
+            font-size: 1rem;
+        }
+        .plan-box .price {
+            font-size: 1.2rem;
+            color: #03dac6;
+        }
+        .plan-box button {
+            background: #bb86fc;
+            color: #121212;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .plan-box button:hover {
+            background: #03dac6;
+        }
+        footer {
+            background: #1e1e1e;
+            color: #ffffff;
+            text-align: center;
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #1e1e1e;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+            width: 90%;
+            max-width: 400px;
+        }
+        .modal-content input {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            width: calc(100% - 2rem);
+            max-width: 300px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background: #2c2c2c;
+            color: #fff;
+        }
+        .modal-content button {
+            background: #bb86fc;
+            color: #121212;
+            padding: 1rem 2rem;
+            margin: 1rem 0;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .modal-content button:hover {
+            background: #03dac6;
+        }
+        .modal-content .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .notification {
+            position: fixed;
+            bottom: -100px;
+            right: 20px;
+            background: #333;
+            color: #fff;
+            padding: 1.5rem;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.5s, bottom 0.5s;
+        }
+        .notification.show {
+            bottom: 20px;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Plans and Pricing</h1>
+    </header>
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="plans.html">Plans and Pricing</a>
+        <a href="dashboard.html">Dashboard</a>
+    </nav>
+    <main>
+        <h2>Choose the plan that suits you best</h2>
+        <div class="pricing-plans">
+            <div class="plan-box" id="basicPlan">
+                <h3>Basic Plan</h3>
+                <p>Storage: 215 MB</p>
+                <p class="price">$0/month</p>
+                <button onclick="choosePlan('Basic')">Choose Plan</button>
+            </div>
+            <div class="plan-box" id="standardPlan">
+                <h3>Standard Plan</h3>
+                <p>Storage: 1 GB</p>
+                <p class="price">$5/month</p>
+                <button onclick="choosePlan('Standard')">Choose Plan</button>
+            </div>
+            <div class="plan-box" id="premiumPlan">
+                <h3>Premium Plan</h3>
+                <p>Storage: 10 GB</p>
+                <p class="price">$10/month</p>
+                <button onclick="choosePlan('Premium')">Choose Plan</button>
+            </div>
+            <div class="plan-box" id="ultimatePlan">
+                <h3>Ultimate Plan</h3>
+                <p>Storage: 50 GB</p>
+                <p class="price">$20/month</p>
+                <button onclick="choosePlan('Ultimate')">Choose Plan</button>
+            </div>
+        </div>
+    </main>
+    <footer>
+        &copy; 2024 Moon-App
+    </footer>
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <button class="close" onclick="closeModal('loginModal')">&times;</button>
+            <h2>Login</h2>
+            <form onsubmit="return false;">
+                <input type="text" id="modal-login-username" placeholder="Username" required>
+                <input type="password" id="modal-login-password" placeholder="Password" required>
+                <button onclick="loginFromModal()">Login</button>
+            </form>
+        </div>
+    </div>
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <button class="close" onclick="closeModal('paymentModal')">&times;</button>
+            <h2>Enter Payment Details</h2>
+            <form onsubmit="return false;">
+                <input type="text" id="name" placeholder="Name" required>
+                <input type="text" id="last-name" placeholder="Last Name" required>
+                <input type="text" id="card-number" placeholder="Card Number" required>
+                <input type="text" id="expiry-date" placeholder="Expiry Date (MM/YY)" required>
+                <input type="text" id="cvv" placeholder="CVV" required>
+                <button onclick="submitPayment()">Submit Payment</button>
+            </form>
+        </div>
+    </div>
+    <div class="notification" id="notification"></div>
+    <script>
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        async function choosePlan(plan) {
+            const isLoggedIn = await fetch('/isLoggedIn', {
+                method: 'GET'
+            }).then(response => response.ok);
+
+            if (!isLoggedIn) {
+                showModal('loginModal');
+            } else if (plan === 'Basic') {
+                const response = await fetch('/choosePlan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ plan })
+                });
+
+                if (response.ok) {
+                    window.location.href = '/dashboard.html';
+                } else {
+                    alert('Failed to choose plan. Please try again.');
+                }
+            } else {
+                showPaymentForm(plan);
+            }
+        }
+
+        async function loginFromModal() {
+            const username = document.getElementById('modal-login-username').value;
+            const password = document.getElementById('modal-login-password').value;
+            const encryptedPassword = btoa(password); // Simple encryption for demo purposes
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password: encryptedPassword })
+            });
+
+            if (response.ok) {
+                closeModal('loginModal');
+            } else {
+                alert('Login failed. Please try again.');
+            }
+        }
+
+        function showPaymentForm(plan) {
+            const form = document.createElement('form');
+            form.action = 'https://www.paypal.com/cgi-bin/webscr';
+            form.method = 'post';
+            form.target = '_top';
+
+            form.innerHTML = `
+                <input type="hidden" name="cmd" value="_xclick">
+                <input type="hidden" name="business" value="sflyonlee@gmail.com">
+                <input type="hidden" name="item_name" value="${plan} Plan">
+                <input type="hidden" name="amount" value="${getPlanPrice(plan)}">
+                <input type="hidden" name="currency_code" value="USD">
+                <input type="hidden" name="return" value="http://your-website.com/success">
+                <input type="hidden" name="cancel_return" value="http://your-website.com/cancel">
+                <button type="submit">Choose Plan</button>
+            `;
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+        }
+
+        function getPlanPrice(plan) {
+            switch (plan) {
+                case 'Standard':
+                    return 5.00;
+                case 'Premium':
+                    return 10.00;
+                case 'Ultimate':
+                    return 20.00;
+                default:
+                    return 0.00;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const isLoggedIn = await fetch('/isLoggedIn', { method: 'GET' }).then(response => response.ok);
+            if (isLoggedIn) {
+                const userPlan = await fetch('/getUserPlan').then(response => response.json());
+                document.querySelectorAll('.plan-box button').forEach(button => {
+                    const plan = button.getAttribute('onclick').split("'")[1];
+                    if (plan === userPlan) {
+                        button.textContent = 'Current Plan';
+                        button.disabled = true;
+                    } else if (planStorageLimits[plan] > planStorageLimits[userPlan]) {
+                        button.textContent = 'Upgrade';
+                    } else {
+                        button.textContent = 'Downgrade';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

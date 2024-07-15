@@ -1,0 +1,744 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #121212;
+    color: #e0e0e0;
+    overflow: hidden; /* Prevent scrolling during loading */
+}
+
+header, nav, main {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+.loaded header, .loaded nav, .loaded main {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.no-animations header, .no-animations nav, .no-animations main {
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+
+header {
+    background: #1e1e1e;
+    color: #ffffff;
+    padding: 1rem 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+nav {
+    background: #333333;
+    display: flex;
+    justify-content: center;
+    padding: 1rem;
+}
+
+nav a {
+    color: #e0e0e0;
+    text-decoration: none;
+    margin: 0 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+nav a:hover {
+    background: #555555;
+}
+
+.profile-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.profile-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.content {
+    display: none;
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.active {
+    display: block;
+}
+
+.upload-form {
+    background: #1e1e1e;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    margin-bottom: 2rem;
+}
+
+.upload-form input[type="file"] {
+    display: none;
+}
+
+.upload-form label {
+    background: #bb86fc;
+    color: #121212;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.upload-form label:hover {
+    background: #03dac6;
+}
+
+.upload-form button {
+    background: #bb86fc;
+    color: #121212;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.upload-form button:hover {
+    background: #03dac6;
+}
+
+.file-preview {
+    margin-top: 1rem;
+    display: none;
+    text-align: center;
+}
+
+.file-preview img,
+.file-preview video,
+.file-preview audio {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.file-list {
+    background: #1e1e1e;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    overflow: hidden; /* Prevent file boxes from overflowing during animation */
+}
+
+.file-box {
+    background: #333333;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.file-box a {
+    color: #bb86fc;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+}
+
+.file-box p {
+    margin: 0.5rem 0;
+}
+
+.file-box a:hover {
+    color: #03dac6;
+}
+
+.file-box button {
+    background: #bb86fc;
+    color: #121212;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-right: 0.5rem;
+}
+
+.file-box button:hover {
+    background: #03dac6;
+}
+
+.file-box.loaded {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+.file-box.no-animations {
+    opacity: 1;
+    transform: none;
+    transition: none;
+}
+
+.button-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.file-info {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.file-info p {
+    margin: 0.5rem 0;
+}
+
+.file-media {
+    margin-left: 1rem;
+}
+
+.file-media video,
+.file-media audio {
+    width: 300px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.file-media audio {
+    margin-top: 10px;
+}
+
+.storage-container {
+    background: #1e1e1e;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 250px;
+    cursor: pointer;
+}
+
+.storage-bar {
+    background: #333333;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.storage-bar-inner {
+    background: #03dac6;
+    height: 20px;
+    border-radius: 5px;
+    transition: width 0.3s;
+}
+
+.storage-bar-text {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top: 0;
+    left: 0;
+    line-height: 20px;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.profile-content {
+    background: #1e1e1e;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.profile-content input,
+.profile-content button {
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-radius: 5px;
+}
+
+.profile-content input {
+    border: 1px solid #333;
+    background: #2c2c2c;
+    color: #fff;
+}
+
+.profile-content button {
+    background: #bb86fc;
+    color: #121212;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.profile-content button:hover {
+    background: #03dac6;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.pagination button {
+    background: #bb86fc;
+    color: #121212;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.pagination button:hover {
+    background: #03dac6;
+}
+
+.pagination button.disabled {
+    background: #555555;
+    cursor: not-allowed;
+}
+
+.search-container {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.search-container input {
+    padding: 0.5rem;
+    width: 100%;
+    max-width: 300px;
+    border-radius: 5px;
+    border: 1px solid #333;
+    background: #2c2c2c;
+    color: #fff;
+}
+
+.notification {
+    position: fixed;
+    bottom: -100px;
+    right: 20px;
+    background: #333;
+    color: #fff;
+    padding: 1.5rem;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.5s, bottom 0.5s;
+}
+
+.notification.show {
+    bottom: 20px;
+    opacity: 1;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-out;
+}
+
+.modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: #1e1e1e;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.modal-content button {
+    background: #bb86fc;
+    color: #121212;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin: 0.5rem;
+}
+
+.modal-content button:hover {
+    background: #03dac6;
+}
+
+.loader {
+    width: 80px;
+    height: 80px;
+    border: 8px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 8px solid #3498db;
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#loadingScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #121212;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    flex-direction: column;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+#loadingScreen.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+#loadingText {
+    margin-top: 20px;
+    color: #fff;
+    font-size: 1.5rem;
+    animation: fade 1.5s ease-in-out infinite;
+}
+
+@keyframes fade {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+#backgroundOverlay {
+    display: none;
+}
+
+.background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 900;
+}
+
+.background-overlay.active {
+    display: block;
+}
+
+.storage-details {
+    display: none;
+    padding: 1rem;
+    background: #1e1e1e;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 300px;
+    z-index: 1001;
+}
+
+.storage-details h3 {
+    margin: 0 0 1rem 0;
+}
+
+.storage-details ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.storage-details li {
+    margin: 0.5rem 0;
+}
+
+.create-profile-btn {
+    background: #bb86fc;
+    color: #121212;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+    margin-top: 1rem;
+}
+
+.create-profile-btn:hover {
+    background: #03dac6;
+}
+
+.create-profile-form {
+    background: #1e1e1e;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    margin-bottom: 2rem;
+}
+
+.create-profile-form input,
+.create-profile-form textarea,
+.create-profile-form button {
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-radius: 5px;
+}
+
+.create-profile-form input,
+.create-profile-form textarea {
+    border: 1px solid #333;
+    background: #2c2c2c;
+    color: #fff;
+}
+
+.create-profile-form button {
+    background: #bb86fc;
+    color: #121212;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.create-profile-form button:hover {
+    background: #03dac6;
+}
+
+/* Loading screen for files section */
+
+.files-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.files-loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 5px solid #3498db;
+    animation: spin 1s linear infinite;
+}
+
+.files-loading-text {
+    margin-top: 10px;
+    color: #fff;
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.toggle-media-button {
+    background: #bb86fc;
+    color: #121212;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 1rem;
+}
+
+.toggle-media-button:hover {
+    background: #03dac6;
+    transform: scale(1.05);
+}
+
+.toggle-media-button:active {
+    transform: scale(0.95);
+}
+
+@keyframes slideDown {
+    from {
+        max-height: 0;
+        opacity: 0;
+    }
+    to {
+        max-height: 500px;
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        max-height: 500px;
+        opacity: 1;
+    }
+    to {
+        max-height: 0;
+        opacity: 0;
+    }
+}
+
+.slide-down {
+    animation: slideDown 0.5s forwards;
+}
+
+.slide-up {
+    animation: slideUp 0.5s forwards;
+}
+
+/* Copy Link Button */
+.copy-button {
+    background: #bb86fc;
+    color: #121212;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    margin-left: 0.5rem;
+    position: relative;
+    width: 40px; /* Set a fixed width */
+    height: 40px; /* Set a fixed height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.copy-button:hover {
+    background: #03dac6;
+    transform: scale(1.05);
+}
+
+.copy-button:active {
+    transform: scale(0.95);
+}
+
+.copy-button .icon-clipboard,
+.copy-button .icon-check {
+    position: absolute;
+    transition: all 0.3s ease-in-out;
+}
+
+.copy-button .icon-clipboard {
+    display: inline-block;
+}
+
+.copy-button .icon-check {
+    display: none;
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Center both vertically and horizontally */
+}
+
+.copy-button.copied .icon-clipboard {
+    display: none;
+}
+
+.copy-button.copied .icon-check {
+    display: inline-block;
+    animation: tickSlide 1s ease-in-out;
+}
+
+@keyframes tickSlide {
+    0% {
+        transform: translate(-50%, -150%); /* Start above */
+        opacity: 0;
+    }
+    30% {
+        transform: translate(-50%, -50%); /* Center */
+        opacity: 1;
+    }
+    70% {
+        transform: translate(-50%, -50%); /* Center */
+        opacity: 1;
+    }
+     100% {
+        transform: translate(-50%, 50%); /* End below */
+        opacity: 0;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-out {
+    animation: fadeOut 0.5s forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+}

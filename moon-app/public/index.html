@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon-App</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+            scroll-behavior: smooth;
+        }
+        header {
+            background: #1e1e1e;
+            color: #ffffff;
+            padding: 1rem 0;
+            text-align: center;
+        }
+        nav {
+            text-align: center;
+            margin: 1rem 0;
+        }
+        nav a {
+            margin: 0 1rem;
+            text-decoration: none;
+            color: #bb86fc;
+        }
+        nav a:hover {
+            color: #03dac6;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+        }
+        .buttons a {
+            background: #bb86fc;
+            color: #121212;
+            padding: 1rem 2rem;
+            margin: 0 1rem;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .buttons a:hover {
+            background: #03dac6;
+        }
+        main {
+            padding: 2rem;
+            text-align: center;
+        }
+        .feature-section {
+            padding: 2rem;
+        }
+        .features-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .feature-box {
+            background: #1e1e1e;
+            border-radius: 10px;
+            padding: 2rem;
+            width: 300px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .feature-box:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .feature-box h3 {
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+        .feature-box p {
+            margin: 1rem 0;
+            font-size: 1rem;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: #1e1e1e;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+            width: 90%;
+            max-width: 400px;
+        }
+        .modal-content input {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            width: calc(100% - 2rem);
+            max-width: 300px;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background: #2c2c2c;
+            color: #fff;
+        }
+        .modal-content button {
+            background: #bb86fc;
+            color: #121212;
+            padding: 1rem 2rem;
+            margin: 1rem 0;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .modal-content button:hover {
+            background: #03dac6;
+        }
+        .modal-content .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        footer {
+            background: #1e1e1e;
+            color: #ffffff;
+            text-align: center;
+            padding: 1rem 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome to Moon-App</h1>
+    </header>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#features">Features</a>
+        <a href="#about">About Us</a>
+        <a href="#contact">Contact Us</a>
+    </nav>
+    <div class="buttons">
+        <a href="#" onclick="showModal('loginModal')">Login</a>
+        <a href="#" onclick="showModal('signupModal')">Sign Up</a>
+    </div>
+    <main>
+        <section id="features" class="feature-section">
+            <h2>Our Features</h2>
+            <div class="features-container">
+                <div class="feature-box">
+                    <h3>Secure File Hosting</h3>
+                    <p>Moon-App ensures your files are stored securely with state-of-the-art encryption and protection measures. Our secure file hosting service guarantees that your files are safe from unauthorized access.</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Image Hosting</h3>
+                    <p>With Moon-App, you can easily upload and share your images with friends, family, or colleagues. Our platform supports a wide range of image formats and provides quick and easy sharing options.</p>
+                </div>
+                <div class="feature-box">
+                    <h3>Fast Uploads</h3>
+                    <p>Enjoy fast upload speeds with Moon-App. Whether you're uploading a single file or a batch of images, our platform is optimized for quick and efficient uploads, saving you time and effort.</p>
+                </div>
+            </div>
+        </section>
+        <section id="about" class="feature-section">
+            <h2>About Moon-App</h2>
+            <p>Moon-App is a file and image hosting service that allows you to securely upload, store, and share your files and images with ease. We are committed to providing a seamless and secure experience for our users.</p>
+        </section>
+        <section id="contact" class="feature-section">
+            <h2>Contact Us</h2>
+            <p>If you have any questions or need support, feel free to reach out to us at contact@moon-app.com.</p>
+        </section>
+    </main>
+    <footer>
+        &copy; 2024 Moon-App
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <button class="close" onclick="closeModal('loginModal')">&times;</button>
+            <h2>Login</h2>
+            <form onsubmit="return false;">
+                <input type="text" id="login-username" placeholder="Username" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button onclick="login()">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <button class="close" onclick="closeModal('signupModal')">&times;</button>
+            <h2>Sign Up</h2>
+            <form onsubmit="return false;">
+                <input type="text" id="signup-username" placeholder="Username" required>
+                <input type="password" id="signup-password" placeholder="Password" required>
+                <button onclick="signup()">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        async function signup() {
+            const username = document.getElementById('signup-username').value;
+            const password = document.getElementById('signup-password').value;
+            const encryptedPassword = btoa(password); // Simple encryption for demo purposes
+
+            const response = await fetch('/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password: encryptedPassword })
+            });
+
+            if (response.ok) {
+                alert('Sign up successful!');
+                closeModal('signupModal');
+                showModal('loginModal');
+            } else {
+                alert('Sign up failed. Please try again.');
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const encryptedPassword = btoa(password); // Simple encryption for demo purposes
+
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password: encryptedPassword })
+            });
+
+            if (response.ok) {
+                window.location.href = '/dashboard.html';
+            } else {
+                alert('Login failed. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
